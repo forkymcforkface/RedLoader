@@ -1,4 +1,3 @@
-﻿a
 <p align="center">
   <a href="#"><img src="https://raw.githubusercontent.com/ToniMacaroni/RedLoader/main/Resources/redlogo.png" width="400"></a>
 </p>
