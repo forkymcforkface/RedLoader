@@ -1,6 +1,6 @@
 ﻿a
 <p align="center">
-  <a href="#"><img src="https://raw.githubusercontent.com/ToniMacaroni/SonsModLoader/master/Resources/redlogo.png" width="400"></a>
+  <a href="#"><img src="https://raw.githubusercontent.com/ToniMacaroni/RedLoader/main/Resources/redlogo.png" width="400"></a>
 </p>
 
 <p align="center">
@@ -9,10 +9,6 @@
 </p>
 
 ---
-
-<!-- <p>
-	<h3 align="center"><a href="https://github.com/LavaGang/MelonLoader">Original Melonloader Repo</a></h3>
-</p> -->
 
 # RedLoader
 **... is a mod loader and sdk for the game "Sons of the Forest". With In-Game configurations, UI frameworks and many APIs for the different systems in the game
@@ -125,8 +121,3 @@ Dedicated servers on windows should work out of the box. Just extract the RedLoa
 
 - [.NET 6.0 Desktop Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/6.0#runtime-6.0.15)
 - Microsoft Visual C++ 2015-2019 Re-distributable [[x64](https://aka.ms/vs/16/release/vc_redist.x64.exe)]
-
-### LICENSING & CREDITS:
-
-RedLoader is a fork of MelonLoader which is licensed under the Apache License, Version 2.0   
-See LICENSING & CREDITS on the original [MelonLoader](https://github.com/LavaGang/MelonLoader) readme for the full list of credits and licenses.
