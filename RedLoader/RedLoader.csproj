@@ -12,10 +12,13 @@
     <ItemGroup>
         <PackageReference Include="HarmonyX" Version="2.10.1" />
         <PackageReference Include="Iced" Version="1.21.0" />
-<!--        <PackageReference Include="Il2CppInterop.Generator" Version="$(Il2CppInteropVersion)"/>-->
-<!--        <PackageReference Include="Il2CppInterop.HarmonySupport" Version="$(Il2CppInteropVersion)"/>-->
-<!--        <PackageReference Include="Il2CppInterop.ReferenceLibs" Version="1.0.0" IncludeAssets="compile" PrivateAssets="all"/>-->
-<!--        <PackageReference Include="Il2CppInterop.Runtime" Version="$(Il2CppInteropVersion)"/>-->
+        <PackageReference Include="Il2CppInterop.Common" Version="$(Il2CppInteropVersion)"/>
+        <PackageReference Include="Il2CppInterop.Generator" Version="$(Il2CppInteropVersion)"/>
+        <PackageReference Include="Il2CppInterop.HarmonySupport" Version="$(Il2CppInteropVersion)"/>
+        <PackageReference Include="Il2CppInterop.Runtime" Version="$(Il2CppInteropVersion)"/>
+        <!-- Pin AsmResolver so Cpp2IL and Il2CppInterop can never resolve to different betas.
+             Mismatch here only fails at runtime (MissingMethodException during interop generation). -->
+        <PackageReference Include="AsmResolver.DotNet" Version="$(AsmResolverVersion)"/>
         <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" IncludeAssets="compile" PrivateAssets="all"/>
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.1" IncludeAssets="compile" PrivateAssets="all"/>
         <PackageReference Include="MonoMod.RuntimeDetour" Version="22.7.31.1"/>
@@ -42,12 +45,6 @@
             <Private>false</Private>
         </Reference>
     </ItemGroup>
-    <ItemGroup>
-      <ProjectReference Include="..\Dependencies\Il2CppInterop\Il2CppInterop.Common\Il2CppInterop.Common.csproj" />
-      <ProjectReference Include="..\Dependencies\Il2CppInterop\Il2CppInterop.Generator\Il2CppInterop.Generator.csproj" />
-      <ProjectReference Include="..\Dependencies\Il2CppInterop\Il2CppInterop.HarmonySupport\Il2CppInterop.HarmonySupport.csproj" />
-      <ProjectReference Include="..\Dependencies\Il2CppInterop\Il2CppInterop.Runtime\Il2CppInterop.Runtime.csproj" />
-    </ItemGroup>
 
     <!-- CopyLocalLockFileAssemblies causes to also output shared assemblies: https://github.com/NuGet/Home/issues/4837#issuecomment-354536302 -->
     <!-- Since all core assemblies usually follow naming of System.*, we just delete them for now -->
@@ -60,7 +57,7 @@
         <Delete Files="@(FilesToDelete)"/>
     </Target>
 
-    <Target Name="CopyProjectDllOnly" AfterTargets="Build">
-        <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="F:\SteamLibrary\steamapps\common\Sons Of The Forest\_Redloader\net6" />
+    <Target Name="CopyProjectDllOnly" AfterTargets="Build" Condition="Exists('$(GamePath)') and '$(DeployToGame)' != 'false'">
+        <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="$(GamePath)\$(ProjectAlias)\net6" ContinueOnError="true" />
     </Target>
 </Project>

@@ -433,7 +433,7 @@ namespace RedLoader
         // public static string GameVersion { get => UnityInformationHandler.GameVersion; }
 
 
-        #if !NET6_0
+        #if !NET6_0_OR_GREATER
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool IsGame32Bit();
 #else

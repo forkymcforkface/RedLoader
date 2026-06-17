@@ -1,6 +1,9 @@
 <Project>
+    <!-- Optional per-machine overrides (e.g. GamePath); gitignored. See Directory.Build.local.props. -->
+    <Import Project="$(MSBuildThisFileDirectory)Directory.Build.local.props" Condition="Exists('$(MSBuildThisFileDirectory)Directory.Build.local.props')" />
+
     <PropertyGroup>
-        <VersionPrefix>0.8.6</VersionPrefix>
+        <VersionPrefix>0.8.7</VersionPrefix>
         <Authors>BepInEx, Toni Macaroni</Authors>
         <LangVersion>latest</LangVersion>
         <Nullable>disable</Nullable>
@@ -13,10 +16,19 @@
         <RepositoryType>git</RepositoryType>
         <BuildDir>$(SolutionDir)bin</BuildDir>
         
-        <Cpp2IlVersion>2022.1.0-pre-release.19</Cpp2IlVersion>
-        <Il2CppInteropVersion>1.4.6-ci.602</Il2CppInteropVersion>
+        <Cpp2IlVersion>2022.1.0-pre-release.21</Cpp2IlVersion>
+        <!-- ci.845 = the BepInEx CI build that targets AsmResolver 6.0.0-beta.5, matching
+             Cpp2IL pre-release.21. The stable 1.5.1 NuGet targets beta.2 and crashes interop
+             generation at runtime with a MissingMethodException. This is the combo MelonLoader 0.7.3 ships. -->
+        <Il2CppInteropVersion>1.5.1-ci.845</Il2CppInteropVersion>
+        <!-- Cpp2IL .21 and Il2CppInterop ci.845 must agree on this exact AsmResolver build. It is
+             pinned explicitly below so a transitive resolve can never split it (beta.2 vs beta.5),
+             which would otherwise surface only at runtime as a MissingMethodException. -->
+        <AsmResolverVersion>6.0.0-beta.5</AsmResolverVersion>
 
         <ProjectAlias>_Redloader</ProjectAlias>
-        <GamePath>F:\SteamLibrary\steamapps\common\Sons Of The Forest</GamePath>
+        <!-- Default game install path. Override per-machine in a (gitignored)
+             Directory.Build.local.props or with -p:GamePath=... -->
+        <GamePath Condition="'$(GamePath)' == ''">C:\Program Files (x86)\Steam\steamapps\common\Sons Of The Forest</GamePath>
     </PropertyGroup>
 </Project>

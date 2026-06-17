@@ -1,0 +1,88 @@
+name: MelonLoader sync check
+
+# Notify-only weekly check. Opens an issue when MelonLoader publishes a release
+# newer than the one RedLoader is synced to, so the shared IL2CPP stack
+# (Il2CppInterop / Cpp2IL / AsmResolver) can be reviewed and bumped in lockstep.
+# NOTE: scheduled runs only fire from the repo's default branch.
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'   # Mondays 09:00 UTC
+  workflow_dispatch:        # allow manual runs (e.g. to test)
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compare pinned stack against MelonLoader's latest release
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            // RedLoader's currently-pinned IL2CPP stack
+            const props = fs.readFileSync('Directory.Build.props', 'utf8');
+            const pick = re => (props.match(re) || [, 'unknown'])[1];
+            const pinned = {
+              Il2CppInterop: pick(/<Il2CppInteropVersion>([^<]+)</),
+              Cpp2IL:        pick(/<Cpp2IlVersion>([^<]+)</),
+              AsmResolver:   pick(/<AsmResolverVersion>([^<]+)</),
+            };
+
+            // The MelonLoader release RedLoader was last synced to
+            const markerPath = '.github/melonloader-synced.txt';
+            const synced = fs.existsSync(markerPath) ? fs.readFileSync(markerPath, 'utf8').trim() : '';
+
+            // MelonLoader's latest stable release
+            const rel = await github.rest.repos.getLatestRelease({ owner: 'LavaGang', repo: 'MelonLoader' });
+            const tag = rel.data.tag_name;
+
+            if (tag === synced) {
+              core.info(`In sync with MelonLoader ${tag}.`);
+              return;
+            }
+
+            // Ensure the label exists, then skip if an open issue already covers this tag
+            const label = 'melonloader-sync';
+            try {
+              await github.rest.issues.getLabel({ ...context.repo, name: label });
+            } catch {
+              await github.rest.issues.createLabel({ ...context.repo, name: label, color: '1d76db', description: 'Drift from upstream MelonLoader' });
+            }
+
+            const title = `MelonLoader ${tag} released — review IL2CPP stack sync`;
+            const open = await github.rest.issues.listForRepo({ ...context.repo, state: 'open', labels: label });
+            if (open.data.some(i => i.title === title)) {
+              core.info('Issue already open for this release.');
+              return;
+            }
+
+            const body = [
+              `**MelonLoader published \`${tag}\`** (RedLoader last synced to \`${synced || 'unknown'}\`).`,
+              ``,
+              `RedLoader currently pins:`,
+              ``,
+              `| Package | Pinned |`,
+              `| --- | --- |`,
+              `| Il2CppInterop | \`${pinned.Il2CppInterop}\` |`,
+              `| Cpp2IL | \`${pinned.Cpp2IL}\` |`,
+              `| AsmResolver | \`${pinned.AsmResolver}\` |`,
+              ``,
+              `Check the release for the versions MelonLoader \`${tag}\` ships and bump`,
+              `\`Directory.Build.props\` to match if they differ.`,
+              ``,
+              `**Keep Cpp2IL ↔ Il2CppInterop ↔ AsmResolver in lockstep** — a mismatch builds`,
+              `fine but fails at runtime (MissingMethodException during interop generation).`,
+              ``,
+              `Release: ${rel.data.html_url}`,
+              ``,
+              `_Once bumped (or if no change is needed), set \`${markerPath}\` to \`${tag}\` to clear this._`,
+            ].join('\n');
+
+            const issue = await github.rest.issues.create({ ...context.repo, title, body, labels: [label] });
+            core.info(`Opened #${issue.data.number}: ${title}`);

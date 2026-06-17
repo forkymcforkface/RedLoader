@@ -3,8 +3,8 @@
 </p>
 
 <p align="center">
-	<a href="https://github.com/ToniMacaroni/RedLoader/releases/latest"><img src="https://img.shields.io/github/downloads/ToniMacaroni/SaberFactory/total?label=downloads&style=for-the-badge"></a>
-	<a href="https://github.com/ToniMacaroni/RedLoader/releases/latest"><img src="https://img.shields.io/github/v/release/ToniMacaroni/SonsModLoader?label=latest&style=for-the-badge"></a>
+	<a href="https://github.com/forkymcforkface/RedLoader/releases/latest"><img src="https://img.shields.io/github/downloads/forkymcforkface/RedLoader/total?label=downloads&style=for-the-badge"></a>
+	<a href="https://github.com/forkymcforkface/RedLoader/releases/latest"><img src="https://img.shields.io/github/v/release/forkymcforkface/RedLoader?label=latest&style=for-the-badge"></a>
 </p>
 
 ---
@@ -43,7 +43,7 @@ and install/update/remove RedLoader as well as other extras for you.
 ___
 
 **Manual**
-1. Download the latest release from [here](https://github.com/ToniMacaroni/RedLoader/releases/latest) (RedLoader.zip)
+1. Download the latest release from [here](https://github.com/forkymcforkface/RedLoader/releases/latest) (RedLoader.zip)
 2. Unpack the zip directly into your game directory (the _Redloader folder should end up in the same directory as SonsOfTheForest.exe)
 3. Make sure you have installed all requirements (listed below)
 ___
@@ -109,12 +109,17 @@ Dedicated servers on windows should work out of the box. Just extract the RedLoa
 
 
 ### Compiling from source
-1. Install .NET 6.0 SDK
-2. Install Nuke globally with `dotnet tool install Nuke.GlobalTool --global`
-3. Install Rust (tripple:`x86_64-pc-windows-msvc` nightly)
-4. Clone the repository
-5. Adjust the game path in `.nuke/parameters.json` and `Directory.Build.props`
-6. Run `nuke pack --configuration Release --restore-packages` in the repo directory
+1. Install the **.NET 8 SDK** — this is the build toolchain only. **The loader itself targets
+   .NET 6 and ships with its own bundled .NET 6 runtime; nothing in RedLoader runs on .NET 8.**
+2. Install **Sons of the Forest** — the `SonsSdk`/`GLTF` projects reference the game's
+   generated interop assemblies, so the game must be present to build them.
+3. Clone the repository. **No `--recursive` is needed** — Il2CppInterop now comes from NuGet
+   rather than a git submodule; all dependencies (Il2CppInterop, Cpp2IL, AsmResolver, …) are
+   restored automatically from the feeds in `nuget.config`.
+4. Point the build at your install: set `<GamePath>` in a (gitignored)
+   `Directory.Build.local.props`, or edit the default in `Directory.Build.props`.
+5. From the `build` directory, run `dotnet run -c Release -- --target MakeZip`.
+   The packaged loader is written to `bin/dist/Redloader.zip`.
 
 ## REQUIREMENTS:
 
